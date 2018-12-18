@@ -463,6 +463,7 @@ verbosemsg "Options: $(print_opts)"
 if [ "$(optvalue p4)" != off ]; then
     msg "[$(cc 0)COMPILE  P4-${OPTS[vsn]}$nn] $(cc 0)$(print_cmd_opts ${OPTS[source]})$nn@$(cc 1)${OPTS[variant]}$nn${OPTS[testcase]+, test case $(cc 1)${OPTS[testcase]-(none)}$nn}${OPTS[dbg]+, $(cc 0)debug$nn mode}"
 
+    msg ${OPTS[example]}
     addopt p4opts "${OPTS[source]}" " "
     addopt p4opts "--p4v ${OPTS[vsn]}" " "
     addopt p4opts "-g ${T4P4S_SRCGEN_DIR}" " "
@@ -471,6 +472,10 @@ if [ "$(optvalue p4)" != off ]; then
     verbosemsg "P4 compiler options: $(print_cmd_opts "${OPTS[p4opts]}")"
 
     IFS=" "
+    echo "MA CHANGE"
+    # mkdir ./build/.cache
+    p4c-bm2-ss --p4v 16 --p4runtime-file ${OPTS[example]}.p4runtime --p4runtime-format text --toJSON ./build/.cache/${OPTS[example]}.p4.json  examples/${OPTS[example]}.p4
+    echo "MA HART"
     $PYTHON -B src/compiler.py ${OPTS[p4opts]}
     exit_on_error "P4 to C compilation failed"
 fi
