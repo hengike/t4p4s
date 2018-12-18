@@ -2,6 +2,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
+
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
@@ -109,10 +110,10 @@ control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
     @name(".mark_to_drop") action drop() {
-        mark_to_drop();
+        /*mark_to_drop();*/
     }
     @name(".set_ecmp_select") action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        hash(meta.ecmp_select.ecmp,
+        /*hash(meta.ecmp_select.ecmp,
 	    HashAlgorithm.crc16,
 	    ecmp_base,
 	    { hdr.ipv4.srcAddr,
@@ -120,7 +121,7 @@ control MyIngress(inout headers hdr,
               hdr.ipv4.protocol,
               hdr.tcp.srcPort,
               hdr.tcp.dstPort },
-	    ecmp_count);
+	    ecmp_count);*/
     }
     @name(".set_nhop") action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
         hdr.ethernet.dstAddr = nhop_dmac;
