@@ -112,8 +112,8 @@ control MyIngress(inout headers hdr,
     @name(".mark_to_drop") action drop() {
         /*mark_to_drop();*/
     }
-    @name(".set_ecmp_select") action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        /*hash(meta.ecmp_select.ecmp,
+   /* @name(".set_ecmp_select") action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
+        hash(meta.ecmp_select.ecmp,
 	    HashAlgorithm.crc16,
 	    ecmp_base,
 	    { hdr.ipv4.srcAddr,
@@ -121,8 +121,8 @@ control MyIngress(inout headers hdr,
               hdr.ipv4.protocol,
               hdr.tcp.srcPort,
               hdr.tcp.dstPort },
-	    ecmp_count);*/
-    }
+	    ecmp_count);
+    }*/
     @name(".set_nhop") action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
         hdr.ethernet.dstAddr = nhop_dmac;
         hdr.ipv4.dstAddr = nhop_ipv4;
@@ -135,7 +135,7 @@ control MyIngress(inout headers hdr,
         }
         actions = {
             drop;
-            set_ecmp_select;
+            /*set_ecmp_select;*/
         }
         size = 1024;
     }

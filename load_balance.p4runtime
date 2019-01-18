@@ -1,0 +1,81 @@
+tables {
+  preamble {
+    id: 33607271
+    name: "ecmp_group"
+    alias: "ecmp_group"
+  }
+  match_fields {
+    id: 1
+    name: "ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16825306
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly()"
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33611335
+    name: "ecmp_nhop"
+    alias: "ecmp_nhop"
+  }
+  match_fields {
+    id: 1
+    name: "ecmp"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16825306
+  }
+  action_refs {
+    id: 16812204
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly()"
+  }
+  size: 2
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16825306
+    name: "mark_to_drop"
+    alias: "mark_to_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16812204
+    name: "set_nhop"
+    alias: "set_nhop"
+  }
+  params {
+    id: 1
+    name: "nhop_dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "nhop_ipv4"
+    bitwidth: 32
+  }
+  params {
+    id: 3
+    name: "port"
+    bitwidth: 9
+  }
+}
