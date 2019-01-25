@@ -47,11 +47,11 @@ void fill_ecmp_group_table(uint8_t dmac[6], uint8_t route1, uint8_t route2, uint
     h = create_p4_header(buffer, 0, 2048);
     te = create_p4_add_table_entry(buffer,0,2048);
     strcpy(te->table_name, "ecmp_group");
-
+;
     exact = add_p4_field_match_exact(te, 2048);
     strcpy(exact->header.name, "routing_metadata.node_id");
-    memcpy(exact->bitmap, &node_id, 2);
-    exact->length = 2*8+0;
+    memcpy(exact->bitmap, &node_id, 1);
+    exact->length = 1*8+0;
 
     a = add_p4_action(h, 2048);
     strcpy(a->description.name, "forward");
@@ -63,12 +63,12 @@ void fill_ecmp_group_table(uint8_t dmac[6], uint8_t route1, uint8_t route2, uint
 
     ap1 = add_p4_action_parameter(h, a, 2048);   
     strcpy(ap1->name, "route1");
-    memcpy(ap1->bitmap, &route1, 1);
+    memcpy(ap1->bitmap, &route1, 2);
     ap1->length = 2*8+0;
 
     ap2 = add_p4_action_parameter(h, a, 2048);   
     strcpy(ap2->name, "route2");
-    memcpy(ap2->bitmap, &route2, 1);
+    memcpy(ap2->bitmap, &route2, 2);
     ap2->length = 2*8+0;
 
 
@@ -128,9 +128,9 @@ void init_simple() {
     uint8_t dmac[6] = {0xd2, 0x69, 0x0f, 0xa8, 0x39, 0x9c};
     uint8_t route1 = 15;
     uint8_t route2 = 16;
-    uint8_t node_id = 9;
+    uint8_t nhgrp = 9;
 
-    fill_ecmp_group_table(dmac, route1, route2, node_id);
+    fill_ecmp_group_table(dmac, route1, route2, nhgrp);
 }
 
 
@@ -140,7 +140,7 @@ int read_config_from_file(char *filename) {
         uint8_t dmac[6];
         uint8_t route1;
         uint8_t route2;
-        uint8_t node_id;
+        uint8_t nhgrp;
         char dummy;
 
         printf("READING\n");
@@ -153,16 +153,16 @@ int read_config_from_file(char *filename) {
                 line_index++;
                 printf("Sor: %hhd.\n",line_index);
                 if (10 == sscanf(line, "%c %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %hhd %hhd %hhd",
-                                &dummy, &dmac[0], &dmac[1], &dmac[2], &dmac[3], &dmac[4], &dmac[5], &route1 , &route2, &node_id) )
+                                &dummy, &dmac[0], &dmac[1], &dmac[2], &dmac[3], &dmac[4], &dmac[5], &route1 , &route2, &nhgrp) )
                 {
                     printf("DMAC: \n");
                     for(int j = 0; j < 6; j++) {
                         printf("%hhx ", dmac[j]);
                     }
                     printf("\n");
-                    printf("filling Route1: %hhd  Route2: %hhd node_id: %hhd\n", route1 , route2, node_id);
+                    printf("filling Route1: %hhd  Route2: %hhd node_id: %hhd\n", route1 , route2, nhgrp);
 
-                    fill_ecmp_group_table(dmac, route1, route2, node_id);
+                    fill_ecmp_group_table(dmac, route1, route2, nhgrp);
                     printf("postfil\n");
                 }
                 else {

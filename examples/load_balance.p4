@@ -7,6 +7,7 @@
 *********************** H E A D E R S  ***********************************
 *************************************************************************/
 
+
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -74,7 +75,7 @@ parser MyParser(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        meta.routing_metadata.node_id=9;
+        meta.routing_metadata.node_id=1;
         transition accept;
     }
 }
