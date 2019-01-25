@@ -43,7 +43,7 @@ header tcp_t {
 }
 
 struct routing_metadata_t {
-    bit<32> nhgroup;
+    bit<8> node_id;
 }
 
 struct metadata {
@@ -74,17 +74,7 @@ parser MyParser(packet_in packet,
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition accept;
-    }
-    state parse_ipv4 {
-        packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            6: parse_tcp;
-            default: accept;
-        }
-    }
-    state parse_tcp {
-        packet.extract(hdr.tcp);
+        meta.routing_metadata.node_id=9;
         transition accept;
     }
 }
@@ -108,15 +98,12 @@ control MyIngress(inout headers hdr,
     @name(".nop") action nop() {
        
     }
-    @name(".forward") action forward(bit<48> dmac_val, bit<8> port1, bit<8> port2) {
-        //printf("%hhd", dmac_val);
+    @name(".forward") action forward(bit<48> dmac_val, bit<8> route1, bit<8> route2) {
         hdr.ethernet.dstAddr = dmac_val;
-        //hdr.ethernet.srcAddr = dmac_val;
-        //hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ecmp_group") table ecmp_group {
         key = {
-            meta.routing_metadata.nhgroup: exact;
+            meta.routing_metadata.node_id: exact;
         }
         actions = {
             nop;
