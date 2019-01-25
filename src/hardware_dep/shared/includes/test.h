@@ -63,7 +63,7 @@ typedef struct testcase_s {
 #define FSLEEP(time)  {FAKE_PKT, 0, 0, FDATA(""), time, 0, FDATA("")}
 #define FEND          {FAKE_END, 0, 0, FDATA(""),    0, 0, FDATA("")}
 
-#define ETH(dst, src, ...) FDATA(dst, src, "0800", ##__VA_ARGS__)
+#define ETH(dst, src, ...) FDATA(dst, src, "080000", ##__VA_ARGS__)
 
 #define ETH01 "000001000000"
 #define ETH02 "000002000000"
@@ -72,6 +72,8 @@ typedef struct testcase_s {
 
 #define ETH1A "001234567890"
 #define ETH1B "001234567891"
+
+#define ETHNODE "111111111111"
 
 // random payloads
 

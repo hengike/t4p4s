@@ -10,7 +10,7 @@
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
-    bit<16> etherType;
+    bit<32> etherType;
 }
 
 header ipv4_t {
@@ -42,14 +42,13 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-struct ecmp_select_t {
-    @name(".ecmp") 
-    bit<14> ecmp;
+struct routing_metadata_t {
+    bit<32> nhgroup;
 }
 
 struct metadata {
-    @name(".ecmp_select")
-    ecmp_select_t ecmp_select;
+    @name(".routing_metadata") 
+    routing_metadata_t routing_metadata;
 }
 
 struct headers {
@@ -70,24 +69,21 @@ parser MyParser(packet_in packet,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     
-    @name(".start") state start {
+    state start {
         transition parse_ethernet;
     }
-    @name(".parse_ethernet") state parse_ethernet {
+    state parse_ethernet {
         packet.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x800: parse_ipv4;
-            default: accept;
-        }
+        transition accept;
     }
-    @name(".parse_ipv4") state parse_ipv4 {
+    state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
             6: parse_tcp;
             default: accept;
         }
     }
-    @name(".parse_tcp") state parse_tcp {
+    state parse_tcp {
         packet.extract(hdr.tcp);
         transition accept;
     }
@@ -109,51 +105,27 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr,
                   inout metadata meta,
                   inout standard_metadata_t standard_metadata) {
-    @name(".mark_to_drop") action drop() {
-        /*mark_to_drop();*/
+    @name(".nop") action nop() {
+       
     }
-   /* @name(".set_ecmp_select") action set_ecmp_select(bit<16> ecmp_base, bit<32> ecmp_count) {
-        hash(meta.ecmp_select.ecmp,
-	    HashAlgorithm.crc16,
-	    ecmp_base,
-	    { hdr.ipv4.srcAddr,
-	      hdr.ipv4.dstAddr,
-              hdr.ipv4.protocol,
-              hdr.tcp.srcPort,
-              hdr.tcp.dstPort },
-	    ecmp_count);
-    }*/
-    @name(".set_nhop") action set_nhop(bit<48> nhop_dmac, bit<32> nhop_ipv4, bit<9> port) {
-        hdr.ethernet.dstAddr = nhop_dmac;
-        hdr.ipv4.dstAddr = nhop_ipv4;
-        standard_metadata.egress_spec = port;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+    @name(".forward") action forward(bit<48> dmac_val, bit<8> port1, bit<8> port2) {
+        //printf("%hhd", dmac_val);
+        hdr.ethernet.dstAddr = dmac_val;
+        //hdr.ethernet.srcAddr = dmac_val;
+        //hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
     }
     @name(".ecmp_group") table ecmp_group {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            meta.routing_metadata.nhgroup: exact;
         }
         actions = {
-            drop;
-            /*set_ecmp_select;*/
+            nop;
+            forward;
         }
         size = 1024;
     }
-    @name(".ecmp_nhop") table ecmp_nhop {
-        key = {
-            meta.ecmp_select.ecmp: exact;
-        }
-        actions = {
-            drop;
-            set_nhop;
-        }
-        size = 2;
-    }
     apply {
-        if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 0) {
-            ecmp_group.apply();
-            ecmp_nhop.apply();
-        }
+        ecmp_group.apply();
     }
 }
 
@@ -185,8 +157,6 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
         packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv4);
-        packet.emit(hdr.tcp);
     }
 }
 

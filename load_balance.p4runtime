@@ -6,42 +6,21 @@ tables {
   }
   match_fields {
     id: 1
-    name: "ipv4.dstAddr"
+    name: "routing_metadata.nhgroup"
     bitwidth: 32
-    match_type: LPM
+    match_type: EXACT
   }
   action_refs {
-    id: 16825306
+    id: 16819938
+  }
+  action_refs {
+    id: 16811908
   }
   action_refs {
     id: 16800567
     annotations: "@defaultonly()"
   }
   size: 1024
-}
-tables {
-  preamble {
-    id: 33611335
-    name: "ecmp_nhop"
-    alias: "ecmp_nhop"
-  }
-  match_fields {
-    id: 1
-    name: "ecmp"
-    bitwidth: 14
-    match_type: EXACT
-  }
-  action_refs {
-    id: 16825306
-  }
-  action_refs {
-    id: 16812204
-  }
-  action_refs {
-    id: 16800567
-    annotations: "@defaultonly()"
-  }
-  size: 2
 }
 actions {
   preamble {
@@ -52,30 +31,30 @@ actions {
 }
 actions {
   preamble {
-    id: 16825306
-    name: "mark_to_drop"
-    alias: "mark_to_drop"
+    id: 16819938
+    name: "nop"
+    alias: "nop"
   }
 }
 actions {
   preamble {
-    id: 16812204
-    name: "set_nhop"
-    alias: "set_nhop"
+    id: 16811908
+    name: "forward"
+    alias: "forward"
   }
   params {
     id: 1
-    name: "nhop_dmac"
+    name: "dmac_val"
     bitwidth: 48
   }
   params {
     id: 2
-    name: "nhop_ipv4"
-    bitwidth: 32
+    name: "port1"
+    bitwidth: 8
   }
   params {
     id: 3
-    name: "port"
-    bitwidth: 9
+    name: "port2"
+    bitwidth: 8
   }
 }
