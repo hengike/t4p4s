@@ -24,7 +24,7 @@
 controller c;
 
 
-void fill_ecmp_group_table(uint8_t dmac[6], uint8_t route1, uint8_t route2, uint8_t node_id)
+void fill_ecmp_group_table(uint8_t new_addr[6], uint8_t route1, uint8_t route2, uint8_t node_id)
 {
     printf("FILL");
     char buffer[2048]; /* TODO: ugly */
@@ -36,9 +36,9 @@ void fill_ecmp_group_table(uint8_t dmac[6], uint8_t route1, uint8_t route2, uint
     struct p4_action_parameter* ap2;
     struct p4_field_match_exact* exact;
 
-    printf("DMAC: \n");
+    printf("new_addr: \n");
     for(int j = 0; j < 6; j++) {
-        printf("%hhx ", dmac[j]);
+        printf("%hhx ", new_addr[j]);
     }
     printf("\n");
     printf("filling Route1: %hhd  Route2: %hhd node_id %hhd\n", route1 , route2, node_id);
@@ -57,8 +57,8 @@ void fill_ecmp_group_table(uint8_t dmac[6], uint8_t route1, uint8_t route2, uint
     strcpy(a->description.name, "forward");
 
     ap0 = add_p4_action_parameter(h, a, 2048);
-    strcpy(ap0->name, "dmac_val");
-    memcpy(ap0->bitmap, &dmac, 6);
+    strcpy(ap0->name, "new_addr");
+    memcpy(ap0->bitmap, &new_addr, 6);
     ap0->length = 6*8+0;
 
     ap1 = add_p4_action_parameter(h, a, 2048);   
@@ -125,22 +125,22 @@ void dhf(void* b) {
 }
 
 void init_simple() {
-    uint8_t dmac[6] = {0xd2, 0x69, 0x0f, 0xa8, 0x39, 0x9c};
+    uint8_t new_addr[6] = {0xd2, 0x69, 0x0f, 0xa8, 0x39, 0x9c};
     uint8_t route1 = 15;
     uint8_t route2 = 16;
-    uint8_t nhgrp = 9;
+    uint8_t node_id = 9;
 
-    fill_ecmp_group_table(dmac, route1, route2, nhgrp);
+    fill_ecmp_group_table(new_addr, route1, route2, node_id);
 }
 
 
 int read_config_from_file(char *filename) {
     FILE *f;
     char line[100];
-        uint8_t dmac[6];
+        uint8_t new_addr[6];
         uint8_t route1;
         uint8_t route2;
-        uint8_t nhgrp;
+        uint8_t node_id;
         char dummy;
 
         printf("READING\n");
@@ -153,16 +153,16 @@ int read_config_from_file(char *filename) {
                 line_index++;
                 printf("Sor: %hhd.\n",line_index);
                 if (10 == sscanf(line, "%c %hhx:%hhx:%hhx:%hhx:%hhx:%hhx %hhd %hhd %hhd",
-                                &dummy, &dmac[0], &dmac[1], &dmac[2], &dmac[3], &dmac[4], &dmac[5], &route1 , &route2, &nhgrp) )
+                                &dummy, &new_addr[0], &new_addr[1], &new_addr[2], &new_addr[3], &new_addr[4], &new_addr[5], &route1 , &route2, &node_id) )
                 {
-                    printf("DMAC: \n");
+                    printf("new_addr: \n");
                     for(int j = 0; j < 6; j++) {
-                        printf("%hhx ", dmac[j]);
+                        printf("%hhx ", new_addr[j]);
                     }
                     printf("\n");
-                    printf("filling Route1: %hhd  Route2: %hhd node_id: %hhd\n", route1 , route2, nhgrp);
+                    printf("filling Route1: %hhd  Route2: %hhd node_id: %hhd\n", route1 , route2, node_id);
 
-                    fill_ecmp_group_table(dmac, route1, route2, nhgrp);
+                    fill_ecmp_group_table(new_addr, route1, route2, node_id);
                     printf("postfil\n");
                 }
                 else {

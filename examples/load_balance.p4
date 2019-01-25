@@ -99,8 +99,8 @@ control MyIngress(inout headers hdr,
     @name(".nop") action nop() {
        
     }
-    @name(".forward") action forward(bit<48> dmac_val, bit<8> route1, bit<8> route2) {
-        hdr.ethernet.dstAddr = dmac_val;
+    @name(".forward") action forward(bit<48> new_addr, bit<8> route1, bit<8> route2) {
+        hdr.ethernet.dstAddr = new_addr;
     }
     @name(".ecmp_group") table ecmp_group {
         key = {
